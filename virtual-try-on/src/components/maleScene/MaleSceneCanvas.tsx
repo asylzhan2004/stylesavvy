@@ -100,6 +100,8 @@ const prepareStatic = (src: THREE.Object3D) => {
     return cl;
 };
 
+const _jointWp = new THREE.Vector3();
+
 // ── Joint sphere ──────────────────────────────────────────────────────────────
 function JointSphere({ bone, boneName, isSelected, isChain, isEditable, onSelect }: {
     bone: THREE.Bone; boneName: string; isSelected: boolean;
@@ -113,9 +115,8 @@ function JointSphere({ bone, boneName, isSelected, isChain, isEditable, onSelect
     useFrame((_, dt) => {
         if (!ref.current) return;
         t.current += dt;
-        const wp = new THREE.Vector3();
-        bone.getWorldPosition(wp);
-        ref.current.position.copy(wp);
+        bone.getWorldPosition(_jointWp);
+        ref.current.position.copy(_jointWp);
         ref.current.scale.setScalar(
             isSelected ? 1 + Math.sin(t.current * 5) * 0.22
                 : isChain ? 1 + Math.sin(t.current * 3) * 0.12
@@ -157,11 +158,13 @@ function BoneStick({ parentBone, childBone, boneName, isSelected, isChain }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const _pw = useMemo(() => new THREE.Vector3(), []);
+    const _cw = useMemo(() => new THREE.Vector3(), []);
+
     useFrame(() => {
         const attr = line.geometry.attributes.position as THREE.BufferAttribute;
-        const pw = new THREE.Vector3(); const cw = new THREE.Vector3();
-        parentBone.getWorldPosition(pw); childBone.getWorldPosition(cw);
-        attr.setXYZ(0, pw.x, pw.y, pw.z); attr.setXYZ(1, cw.x, cw.y, cw.z);
+        parentBone.getWorldPosition(_pw); childBone.getWorldPosition(_cw);
+        attr.setXYZ(0, _pw.x, _pw.y, _pw.z); attr.setXYZ(1, _cw.x, _cw.y, _cw.z);
         attr.needsUpdate = true;
         const mat = line.material as THREE.LineBasicMaterial;
         mat.color.set(isSelected ? '#fff' : BONE_COLOR[boneName] ?? '#7dff8f');

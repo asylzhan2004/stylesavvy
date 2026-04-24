@@ -260,3 +260,18 @@ button {
     contain: strict;
 }
 
+.promo-card {
+    contain: layout paint;
+}
+
+.glass-panel {
+    contain: layout style;
+}
+
+/* GPU layer promotion for animated elements */
+.studio-canvas,
+.studio-topbar {
+    will-change: transform;
+    contain: layout;
+}
+

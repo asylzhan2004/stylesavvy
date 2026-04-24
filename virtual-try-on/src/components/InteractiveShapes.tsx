@@ -1,13 +1,13 @@
-import { useRef, useState, Suspense, useMemo } from 'react';
+import { useRef, useState, Suspense, useMemo, memo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Float, Environment } from '@react-three/drei';
+import { useGLTF, Float } from '@react-three/drei';
 import * as THREE from 'three';
 
-function TShirtModel({ position, color, speed, rotationSpeed }: any) {
+const TShirtModel = memo(function TShirtModel({ position, color, speed, rotationSpeed }: any) {
     const meshRef = useRef<THREE.Group>(null!);
     const [hovered, setHovered] = useState(false);
+    const prevRotRef = useRef({ x: 0, y: 0 });
 
-    // Load the GLB model
     const { scene } = useGLTF('/models/Kyim8blend.glb');
 
     // Clone and prepare the object
@@ -64,26 +64,23 @@ function TShirtModel({ position, color, speed, rotationSpeed }: any) {
 
         const { x, y } = state.mouse;
 
-        // Previous rotation for inertia calculation
-        const prevRotX = meshRef.current.rotation.x;
-        const prevRotY = meshRef.current.rotation.y;
+        const prevRotX = prevRotRef.current.x;
+        const prevRotY = prevRotRef.current.y;
 
-        // Smooth rotation
         meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, y * rotationSpeed + 0.2, 0.1);
         meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, x * rotationSpeed + state.clock.elapsedTime * 0.2, 0.1);
 
-        // Movement
         meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, position[0] + x * 2, 0.05);
         meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, position[1] + y * 2, 0.05);
 
-        // Sleeve Physics (Inertia)
         const rotationDiffX = meshRef.current.rotation.x - prevRotX;
         const rotationDiffY = meshRef.current.rotation.y - prevRotY;
 
+        prevRotRef.current.x = meshRef.current.rotation.x;
+        prevRotRef.current.y = meshRef.current.rotation.y;
+
         bones.forEach((bone) => {
-            // Reaction to horizontal rotation (Y-axis rotation causes Z-axis bone bend)
             bone.rotation.z = THREE.MathUtils.lerp(bone.rotation.z, rotationDiffY * 5, 0.1);
-            // Reaction to vertical rotation
             bone.rotation.x = THREE.MathUtils.lerp(bone.rotation.x, rotationDiffX * 5, 0.1);
         });
     });
@@ -101,25 +98,29 @@ function TShirtModel({ position, color, speed, rotationSpeed }: any) {
             </group>
         </Float>
     );
-}
+});
 
-export function InteractiveShapes() {
+export const InteractiveShapes = memo(function InteractiveShapes() {
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
-            <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
+            <Canvas
+                camera={{ position: [0, 0, 10], fov: 45 }}
+                dpr={[1, 1]}
+                gl={{ antialias: false, powerPreference: 'high-performance' }}
+                performance={{ min: 0.5 }}
+            >
                 <Suspense fallback={null}>
-                    <ambientLight intensity={0.3} />
+                    <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} intensity={1.2} color="#39ff14" />
                     <pointLight position={[-10, -10, -10]} intensity={0.6} color="#39ff14" />
                     <pointLight position={[0, 5, 5]} intensity={0.4} color="#00fff5" />
 
                     <InteractiveShapesGroup />
-                    <Environment preset="city" />
                 </Suspense>
             </Canvas>
         </div>
     );
-}
+});
 
 function InteractiveShapesGroup() {
     return (
