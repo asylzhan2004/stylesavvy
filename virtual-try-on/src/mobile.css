@@ -1,0 +1,543 @@
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVE — style-savvy.app
+   Breakpoints: 480px / 640px / 768px / 1024px
+   ══════════════════════════════════════════ */
+
+/* ── Viewport meta safety ── */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* ══ NAVBAR ══ */
+.navbar-container {
+    width: 100%;
+}
+
+/* ══ GLOBAL TOUCH TARGETS ══ */
+@media (max-width: 768px) {
+    button, a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ══════════════════════════════════════════
+   HOME PAGE — hero section
+   ══════════════════════════════════════════ */
+
+/* Hero badge on mobile (HeroVideo) */
+@media (max-width: 640px) {
+    /* Shrink hero video inset on phone */
+    .hero-video-wrapper {
+        inset: 80px 12px 40px !important;
+        border-radius: 20px !important;
+    }
+
+    /* Hero headline */
+    .hero-ink {
+        font-size: clamp(48px, 14vw, 80px) !important;
+    }
+
+    /* Hero CTA buttons — stack vertically */
+    .hero-cta-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .hero-cta-row button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Stats grid — 2 cols on mobile */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   HOME — CATEGORIES cards
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Card inner grid: single column */
+    .category-card-inner {
+        grid-template-columns: 1fr !important;
+    }
+    /* 3D canvas area height on mobile */
+    .category-canvas-area {
+        min-height: 220px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   HOME — FACTS section (2-col → 1-col)
+   ══════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .facts-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   HOME — FOOTER (complex grid → 1-col)
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .home-footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   HOME (old view) — product grid
+   ══════════════════════════════════════════ */
+@media (max-width: 640px) {
+    .product-grid-old {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+        padding: 0 !important;
+    }
+    .features-grid-old {
+        grid-template-columns: 1fr !important;
+    }
+    .old-footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   PROMO CAROUSEL
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .promo-section-header {
+        padding: 0 20px !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .promo-scroll-container {
+        padding: 12px 20px 24px !important;
+    }
+    .promo-card {
+        min-width: 85vw !important;
+        height: 260px !important;
+    }
+    .promo-card h3 {
+        font-size: 24px !important;
+    }
+    .promo-card-content {
+        bottom: 24px !important;
+        left: 24px !important;
+        right: 24px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   LOGIN — 2-col → 1-col
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .login-grid {
+        grid-template-columns: 1fr !important;
+        width: 95% !important;
+    }
+    .login-left-panel {
+        border-radius: 24px 24px 0 0 !important;
+        border-right: 1px solid rgba(255,255,255,0.06) !important;
+        padding: 36px 28px !important;
+    }
+    .login-right-panel {
+        border-radius: 0 0 24px 24px !important;
+        border-left: 1px solid rgba(22,163,74,0.1) !important;
+        border-top: none !important;
+        padding: 32px 28px !important;
+    }
+    .login-social-row {
+        flex-direction: column !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   REGISTER — padding on mobile
+   ══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    .register-card {
+        padding: 36px 24px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   VERIFY — OTP inputs shrink
+   ══════════════════════════════════════════ */
+@media (max-width: 400px) {
+    .verify-digit-input {
+        width: 40px !important;
+        height: 50px !important;
+        font-size: 20px !important;
+    }
+    .verify-otp-row {
+        gap: 6px !important;
+    }
+}
+@media (max-width: 360px) {
+    .verify-digit-input {
+        width: 34px !important;
+        height: 44px !important;
+        font-size: 18px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   PROFILE — tabs & layout
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .profile-main-container {
+        padding: 0 16px !important;
+    }
+    .profile-header-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+    }
+    .profile-overview-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .profile-tabs-row {
+        width: 100% !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-wrap: nowrap !important;
+    }
+    .profile-tabs-row::-webkit-scrollbar {
+        display: none;
+    }
+    .profile-tab-btn {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .profile-signout-btn {
+        align-self: flex-start !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-banner {
+        height: 180px !important;
+    }
+    .profile-avatar {
+        width: 90px !important;
+        height: 90px !important;
+        font-size: 30px !important;
+    }
+    .profile-name {
+        font-size: 24px !important;
+    }
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   STUDIO 3D — Mobile layout & touch controls
+   ══════════════════════════════════════════ */
+
+/* ── Swipe handle above panel ── */
+.studio-sidebar::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.18);
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .studio-wizard-overlay {
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 16px !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .studio-wizard-stage {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 64px 0 24px !important;
+    }
+
+    /* ── Bottom sheet panel ── */
+    .studio-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        top: auto !important;
+        height: min(70vh, calc(100dvh - 108px)) !important;
+        max-height: none !important;
+        border-radius: 24px 24px 0 0 !important;
+        border-left: none !important;
+        border-top: 1px solid rgba(255,255,255,0.07) !important;
+        background: rgba(14,14,14,0.99) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        z-index: 900 !important;
+        transform: translateY(calc(100% - 76px)) !important;
+        transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+                    box-shadow 0.32s ease !important;
+        box-shadow: 0 -20px 60px rgba(0,0,0,0.5) !important;
+        /* Scroll snap for inner content */
+        overscroll-behavior: contain !important;
+    }
+    .studio-sidebar-open {
+        transform: translateY(0) !important;
+        box-shadow: 0 -24px 80px rgba(0,0,0,0.7) !important;
+    }
+    .studio-sidebar-closed {
+        transform: translateY(calc(100% - 76px)) !important;
+    }
+
+    /* ── Collapsed tab bar visible at bottom ── */
+    .studio-toolbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 2 !important;
+        background: rgba(14,14,14,0.98) !important;
+        backdrop-filter: blur(14px) !important;
+        padding: 10px 10px 0 !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+    }
+    .studio-toolbar > button {
+        min-width: calc(50% - 3px) !important;
+        flex: 1 1 calc(50% - 3px) !important;
+        min-height: 44px !important;
+    }
+
+    /* ── 3D canvas area ── */
+    .studio-canvas {
+        height: calc(100dvh - 76px - 50px) !important;
+        min-height: 260px !important;
+    }
+    .studio-shell {
+        flex-direction: column !important;
+    }
+
+    /* ── Topbar ── */
+    .studio-topbar {
+        height: auto !important;
+        min-height: 50px !important;
+        padding: 6px 10px !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+    }
+    .studio-topbar::-webkit-scrollbar { display: none; }
+    .studio-topbar > button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        font-size: 10px !important;
+        padding: 5px 8px !important;
+    }
+    .studio-mobile-toggle {
+        display: inline-flex !important;
+    }
+
+    /* ── Design chip row ── */
+    .studio-chip-row > button {
+        min-width: calc(50% - 3px) !important;
+        flex: 1 1 calc(50% - 3px) !important;
+        min-height: 44px !important;
+    }
+
+    /* ── Upload row ── */
+    .studio-action-row {
+        flex-wrap: wrap !important;
+    }
+    .studio-action-row > label {
+        min-width: calc(33.333% - 4px) !important;
+        flex: 1 1 calc(33.333% - 4px) !important;
+        min-height: 54px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        font-size: 10px !important;
+        padding: 8px 4px !important;
+    }
+
+    /* ── Panel scroll area ── */
+    .studio-panel-scroll {
+        padding-bottom: env(safe-area-inset-bottom, 24px) !important;
+    }
+
+    /* ── Hide desktop-only floating hints ── */
+    .studio-mobile-hide {
+        display: none !important;
+    }
+
+    /* ── Touch gesture pads – full width ── */
+    .touch-gesture-pad {
+        touch-action: none !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+    .studio-sidebar {
+        height: min(75vh, calc(100dvh - 100px)) !important;
+    }
+    .studio-action-row > label {
+        font-size: 9px !important;
+    }
+    .studio-topbar > button {
+        font-size: 9px !important;
+        padding: 4px 6px !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .studio-wizard-stage {
+        margin-top: 72px !important;
+    }
+}
+
+.studio-mobile-toggle {
+    display: none;
+}
+
+/* ══════════════════════════════════════════
+   UTILS — text overflow protection
+   ══════════════════════════════════════════ */
+@media (max-width: 640px) {
+    .overflow-protect {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* Safe area insets for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .navbar-container {
+        padding-top: env(safe-area-inset-top);
+    }
+    .studio-sidebar {
+        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   iOS: Prevent input zoom (font-size >= 16px)
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   PROFILE — banner on very small screens
+   ══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    .profile-banner {
+        height: 180px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   VERIFY card — padding shrink on phone
+   ══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    .verify-card {
+        padding: 36px 24px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   3D Canvas — disable text selection on touch
+   ══════════════════════════════════════════ */
+canvas {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* ══════════════════════════════════════════
+   HERO section — phone tweaks
+   ══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    /* Push hero content below navbar properly */
+    section#overview {
+        padding-top: 90px !important;
+        padding-bottom: 60px !important;
+        min-height: unset !important;
+    }
+    /* Tighter category section padding */
+    section#categories {
+        padding-top: 50px !important;
+        padding-bottom: 60px !important;
+    }
+    section#facts {
+        padding-top: 50px !important;
+        padding-bottom: 60px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   ORDERS tab — responsive rows
+   ══════════════════════════════════════════ */
+@media (max-width: 640px) {
+    .order-row-content {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+    .order-row-status {
+        flex-direction: row !important;
+        gap: 12px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   LANGUAGE SWITCHER — shrink on very small
+   ══════════════════════════════════════════ */
+@media (max-width: 360px) {
+    .lang-switcher button {
+        padding: 4px 7px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   GENERAL: fix horizontal overflow
+   ══════════════════════════════════════════ */
+body {
+    overflow-x: hidden;
+    min-height: 100dvh;
+}
+* {
+    max-width: 100%;
+}

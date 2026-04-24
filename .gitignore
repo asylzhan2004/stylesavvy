@@ -1,0 +1,18 @@
+# Build outputs
+backend/dist/
+virtual-try-on/dist/
+
+# Dependencies
+backend/node_modules/
+virtual-try-on/node_modules/
+virtual-try-on/server/node_modules/
+
+# Temp & scratch
+virtual-try-on/server/style_savvy.db
+
+# Secrets
+backend/.env
+
+# OS
+.DS_Store
+Thumbs.db

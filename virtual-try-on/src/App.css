@@ -1,0 +1,262 @@
+/* Шрифты загружаются в index.html (Manrope, Bebas Neue, Teko) */
+
+@font-face {
+    font-family: 'Very Very Punk';
+    src: url('/fonts/very-very-punk.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    /* Punk Dark Green Palette */
+    --bg-dark: #050505;
+    --bg-card: rgba(10, 10, 10, 0.85);
+    --bg-glass: rgba(255, 255, 255, 0.03);
+
+    --primary: #39ff14;
+    /* Neon Green */
+    --primary-dark: #16a34a;
+    --primary-glow: rgba(57, 255, 20, 0.5);
+    --secondary: #22c55e;
+    --accent-cyan: #00fff5;
+    --accent-pink: #ff2d7b;
+
+    --text-main: #ffffff;
+    --text-muted: #6b6b7b;
+
+    --glass-border: 1px solid rgba(57, 255, 20, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+
+    --font-main: 'Manrope', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Manrope', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-punk: 'Bebas Neue', 'Teko', 'Impact', sans-serif;
+    --font-hero: 'Very Very Punk', 'Bebas Neue', 'Teko', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html[lang="kz"] {
+    --font-punk: 'Akzentica4F-Bold', 'Bebas Neue', 'Teko', 'Impact', sans-serif;
+    --font-main: 'Manrope', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Manrope', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+button {
+    font-family: var(--font-main);
+}
+
+/* ══════════════════════════════════════════
+   GRADIENT ANIMATION
+   ══════════════════════════════════════════ */
+@keyframes gradient-xy {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ══════════════════════════════════════════
+   SIMPLE SPINNER
+   ══════════════════════════════════════════ */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Glitch text effect — статические hints цвета (без clip-path анимации) */
+.glitch-text {
+    position: relative;
+    display: inline-block;
+}
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.08;
+}
+.glitch-text::before {
+    color: var(--accent-cyan);
+    transform: translate(2px, -1px);
+    z-index: -1;
+}
+.glitch-text::after {
+    color: var(--accent-pink);
+    transform: translate(-2px, 1px);
+    z-index: -1;
+}
+
+/* ══════════════════════════════════════════
+   INK / DRIP TEXT EFFECT
+   ══════════════════════════════════════════ */
+.ink-text {
+    position: relative;
+    display: inline-block;
+    color: var(--primary);
+    text-shadow:
+        0 0 7px var(--primary),
+        0 0 20px rgba(57, 255, 20, 0.4),
+        0 0 42px rgba(57, 255, 20, 0.2),
+        2px 2px 0 rgba(0, 255, 245, 0.2),
+        -2px -2px 0 rgba(255, 45, 123, 0.15);
+    filter: url('#ink-filter');
+}
+
+/* ══════════════════════════════════════════
+   GLOW PULSE — Green Orbs
+   ══════════════════════════════════════════ */
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.15; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(1.15); }
+}
+
+@keyframes glow-drift {
+    0% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -20px) scale(1.1); }
+    50% { transform: translate(-20px, 15px) scale(0.95); }
+    75% { transform: translate(15px, 25px) scale(1.05); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ══════════════════════════════════════════
+   SHIMMER LINE — Section Divider
+   ══════════════════════════════════════════ */
+@keyframes shimmer-line {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ══════════════════════════════════════════
+   FLOAT UP — Particle Rise
+   ══════════════════════════════════════════ */
+@keyframes float-up {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-80vh) scale(0.6); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════
+   FADE SLIDE IN — Section reveals
+   ══════════════════════════════════════════ */
+@keyframes fade-slide-up {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   VIDEO HERO — Ken Burns pan
+   ══════════════════════════════════════════ */
+@keyframes ken-burns {
+    0%   { transform: scale(1.04) translate(0, 0); }
+    50%  { transform: scale(1.08) translate(-1%, 0.5%); }
+    100% { transform: scale(1.04) translate(0, 0); }
+}
+
+/* ══════════════════════════════════════════
+   PUNK NAVBAR GLOW
+   ══════════════════════════════════════════ */
+@keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow:
+            0 0 4px #39ff14,
+            0 0 11px #39ff14,
+            0 0 30px rgba(57,255,20,0.4);
+    }
+    20%, 24%, 55% {
+        text-shadow: none;
+    }
+}
+
+@keyframes border-glow-pulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(57,255,20,0.15), 0 1px 0 rgba(57,255,20,0.1); }
+    50% { box-shadow: 0 0 15px rgba(57,255,20,0.3), 0 1px 0 rgba(57,255,20,0.2); }
+}
+
+/* (page-transition-overlay убран — используем только opacity fade) */
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: rgba(57,255,20,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(57,255,20,0.4); }
+
+/* ══════════════════════════════════════════
+   GPU ACCELERATION — will-change hints
+   ══════════════════════════════════════════ */
+
+/* Анимации трансформации — GPU compositing */
+.glitch-text::before,
+.glitch-text::after {
+    will-change: clip-path, transform;
+}
+
+/* Страничный оверлей — изолируем repaint */
+.page-transition-overlay {
+    will-change: opacity;
+    contain: layout style;
+}
+
+.scan-line {
+    will-change: top;
+}
+
+/* ══════════════════════════════════════════
+   REDUCE MOTION — уважаем настройки ОС
+   ══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    .glitch-text::before,
+    .glitch-text::after {
+        animation: none;
+    }
+    .scan-line {
+        animation: none;
+    }
+    * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   PERF: contain для тяжёлых card-секций
+   ══════════════════════════════════════════ */
+.category-canvas-area {
+    contain: strict;
+}
+
