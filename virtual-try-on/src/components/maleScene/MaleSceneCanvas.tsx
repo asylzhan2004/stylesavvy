@@ -276,6 +276,7 @@ function SceneContent({
     const origPosesRef       = useRef<Record<string, BonePose>>({});
     const [dragging, setDragging]     = useState(false);
     const [bonesReady, setBonesReady] = useState(false);
+    const isDraggingGarmentRef        = useRef(false);
 
     // ── Collect bones ─────────────────────────────────────────────────────────
     useEffect(() => {
@@ -305,10 +306,10 @@ function SceneContent({
         setBonesReady(true);
     }, [avatar, onBoneDefaultsReady, onBonesReady]);
 
-    // ── Garment transform from preset ─────────────────────────────────────────
+    // ── Garment transform from preset (skip while gizmo is dragging) ──────────
     useEffect(() => {
         const g = garmentGroupRef.current;
-        if (!g) return;
+        if (!g || isDraggingGarmentRef.current) return;
         g.position.set(...preset.garmentTransform.position);
         g.rotation.set(...preset.garmentTransform.rotation);
         g.scale.set(...preset.garmentTransform.scale);
@@ -328,21 +329,22 @@ function SceneContent({
         }
     }, [avatar, preset.avatarPose.bones]);
 
-    // ── Garment gizmo events (real-time updates for smooth feedback) ────────────
+    // ── Garment gizmo events (commit on drag-end, visual handled by TransformControls) ─
     useEffect(() => {
         const ctrl = garmentControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'garment') return;
-        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
-        const onChange = () => {
-            const g = garmentGroupRef.current;
-            if (!g) return;
-            onGarmentTransformChange?.(readGarmentTransform(g));
+        const onDrag = (e: { value?: boolean }) => {
+            const active = Boolean(e.value);
+            isDraggingGarmentRef.current = active;
+            setDragging(active);
+            if (!active) {
+                const g = garmentGroupRef.current;
+                if (g) onGarmentTransformChange?.(readGarmentTransform(g));
+            }
         };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('objectChange', onChange);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('objectChange', onChange);
         };
     }, [editTarget, editable, onGarmentTransformChange]);
 
