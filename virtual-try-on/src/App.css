@@ -275,3 +275,19 @@ button {
     contain: layout;
 }
 
+/* Navbar — lighter blur for better scroll perf */
+.navbar-container nav {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Male scene panel — isolate repaints during bone editing */
+.ams-panel {
+    contain: layout style;
+}
+
+/* Studio wizard overlay — isolate heavy backdrop blur */
+.studio-wizard-overlay {
+    contain: layout paint;
+}
+

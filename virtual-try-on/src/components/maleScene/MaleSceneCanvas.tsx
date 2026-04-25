@@ -10,7 +10,7 @@
  */
 
 import {
-    Suspense, useCallback, useEffect, useMemo, useRef, useState,
+    Suspense, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, OrbitControls, TransformControls, useGLTF } from '@react-three/drei';
@@ -232,7 +232,7 @@ function SkeletonOverlay({ bones, selectedBoneName, editable, onBoneSelect }: {
 // ── Floor grid ────────────────────────────────────────────────────────────────
 */
 
-function FloorGrid() {
+const FloorGrid = memo(function FloorGrid() {
     return (
         <group position={[0, -0.93, 0]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
@@ -253,7 +253,7 @@ function FloorGrid() {
             ))}
         </group>
     );
-}
+});
 
 // ── Scene content ─────────────────────────────────────────────────────────────
 function SceneContent({
@@ -328,7 +328,7 @@ function SceneContent({
         }
     }, [avatar, preset.avatarPose.bones]);
 
-    // ── Garment gizmo events ──────────────────────────────────────────────────
+    // ── Garment gizmo events (commit only on drag-end for perf) ─────────────────
     useEffect(() => {
         const ctrl = garmentControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'garment') return;
@@ -350,7 +350,7 @@ function SceneContent({
         };
     }, [editTarget, editable, onGarmentTransformChange]);
 
-    // ── Bone gizmo events ─────────────────────────────────────────────────────
+    // ── Bone gizmo events (commit only on drag-end for perf) ───────────────────
     const selectedBone = selectedBoneName ? bonesRef.current[selectedBoneName] ?? null : null;
 
     useEffect(() => {
@@ -380,14 +380,11 @@ function SceneContent({
             <color attach="background" args={['#06090a']} />
             <fog attach="fog" args={['#06090a', 7, 16]} />
 
-            {/* Lighting */}
-            <ambientLight intensity={0.7} />
-            <hemisphereLight intensity={0.8} color="#ffffff" groundColor="#102214" />
-            <directionalLight position={[3.8, 5.5, 3.6]} intensity={2.2} color="#f8fff5" castShadow shadow-mapSize={[2048, 2048]} />
-            <directionalLight position={[-3.5, 2.8, 2.5]} intensity={1.0} color="#8df6a5" />
-            <pointLight position={[0, 1.5, 2.5]} intensity={1.1} color="#d6ffe1" />
-            <spotLight position={[0, 6, 0]} angle={0.4} penumbra={0.5} intensity={1.3} color="#d7ffdb" />
-            <pointLight position={[0, 2.5, -2.5]} intensity={0.6} color="#2af5a2" />
+            {/* Lighting — reduced from 7 to 4 sources for perf */}
+            <ambientLight intensity={0.8} />
+            <hemisphereLight intensity={0.9} color="#ffffff" groundColor="#102214" />
+            <directionalLight position={[3.8, 5.5, 3.6]} intensity={2.4} color="#f8fff5" castShadow shadow-mapSize={[1024, 1024]} />
+            <directionalLight position={[-3.5, 2.8, 2.5]} intensity={1.2} color="#8df6a5" />
 
             <FloorGrid />
 
@@ -450,7 +447,8 @@ export function MaleSceneCanvas(props: MaleSceneCanvasProps) {
             <Canvas
                 camera={{ position: [0, 1.2, 3.3], fov: 34 }}
                 shadows
-                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+                dpr={[1, 1.5]}
+                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, powerPreference: 'high-performance' }}
             >
                 <Suspense fallback={
                     <Html center>

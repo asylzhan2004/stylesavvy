@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { adminSceneAPI } from '../api/client';
 import { MaleSceneCanvas } from '../components/maleScene/MaleSceneCanvas';
@@ -155,7 +155,7 @@ const toDegrees = (value: number) => (value * 180) / Math.PI;
 const toRadians = (value: number) => (value * Math.PI) / 180;
 const fixed = (value: number, digits = 3) => Number(value.toFixed(digits));
 
-function VectorInputs({
+const VectorInputs = memo(function VectorInputs({
     label,
     value,
     step,
@@ -189,9 +189,9 @@ function VectorInputs({
             </div>
         </div>
     );
-}
+});
 
-function RotationInputs({
+const RotationInputs = memo(function RotationInputs({
     label,
     value,
     onChange,
@@ -229,7 +229,7 @@ function RotationInputs({
             </div>
         </div>
     );
-}
+});
 
 export function AdminMaleScene() {
     const { token: siteToken, user: siteUser, logout: siteLogout } = useOutfitStore();
@@ -320,7 +320,7 @@ export function AdminMaleScene() {
         }
     }, [availableBones, selectedBoneName]);
 
-    const mutateSceneStore = (mutator: (current: MaleSceneStore) => MaleSceneStore) => {
+    const mutateSceneStore = useCallback((mutator: (current: MaleSceneStore) => MaleSceneStore) => {
         setSceneStore((current) => {
             if (!current) {
                 return current;
@@ -330,9 +330,9 @@ export function AdminMaleScene() {
         });
         setIsDirty(true);
         setNotice('');
-    };
+    }, []);
 
-    const mutateSelectedPreset = (mutator: (preset: MaleGarmentPreset) => MaleGarmentPreset) => {
+    const mutateSelectedPreset = useCallback((mutator: (preset: MaleGarmentPreset) => MaleGarmentPreset) => {
         if (!selectedGarment) {
             return;
         }
@@ -357,7 +357,7 @@ export function AdminMaleScene() {
                 },
             };
         });
-    };
+    }, [selectedGarment, mutateSceneStore]);
 
 
 
@@ -386,11 +386,11 @@ export function AdminMaleScene() {
         navigate('/login');
     };
 
-    const handleGarmentTransformChange = (transform: MaleGarmentPreset['garmentTransform']) => {
+    const handleGarmentTransformChange = useCallback((transform: MaleGarmentPreset['garmentTransform']) => {
         mutateSelectedPreset((preset) => ({ ...preset, garmentTransform: transform }));
-    };
+    }, [mutateSelectedPreset]);
 
-    const handleBoneTransformChange = (boneName: string, pose: BonePose) => {
+    const handleBoneTransformChange = useCallback((boneName: string, pose: BonePose) => {
         mutateSelectedPreset((preset) => ({
             ...preset,
             avatarPose: {
@@ -400,7 +400,7 @@ export function AdminMaleScene() {
                 },
             },
         }));
-    };
+    }, [mutateSelectedPreset]);
 
     const ensureSceneStore = sceneStore ?? createDefaultMaleSceneStore();
 

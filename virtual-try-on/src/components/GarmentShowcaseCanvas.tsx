@@ -90,7 +90,7 @@ export const GarmentShowcaseCanvas = memo(function GarmentShowcaseCanvas({
                 camera={{ position: [0, 0, 4.6], fov: 32 }}
                 dpr={[1, 1]}
                 gl={{ antialias: false, powerPreference: 'high-performance' }}
-                performance={{ min: 0.5 }}
+                performance={{ min: 0.3 }}
                 frameloop="always"
             >
                 <ambientLight intensity={1.1} />
