@@ -88,6 +88,14 @@ const cloneMat = (m: THREE.Material) => {
     if ('side' in c) (c as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
     return c;
 };
+const readTransform = (object: THREE.Object3D) => ({
+    position: [object.position.x, object.position.y, object.position.z] as BonePose['position'],
+    rotation: [object.rotation.x, object.rotation.y, object.rotation.z] as BonePose['rotation'],
+});
+const readGarmentTransform = (object: THREE.Object3D): MaleGarmentPreset['garmentTransform'] => ({
+    ...readTransform(object),
+    scale: [object.scale.x, object.scale.y, object.scale.z],
+});
 const prepareStatic = (src: THREE.Object3D) => {
     const cl = src.clone(true);
     cl.traverse(child => {
@@ -324,21 +332,21 @@ function SceneContent({
     useEffect(() => {
         const ctrl = garmentControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'garment') return;
-        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
-        const onChange = () => {
+        const commitTransform = () => {
             const g = garmentGroupRef.current;
             if (!g) return;
-            onGarmentTransformChange?.({
-                position: [g.position.x, g.position.y, g.position.z],
-                rotation: [g.rotation.x, g.rotation.y, g.rotation.z],
-                scale:    [g.scale.x, g.scale.y, g.scale.z],
-            });
+            onGarmentTransformChange?.(readGarmentTransform(g));
+        };
+        const onDrag = (e: { value?: boolean }) => {
+            const isDragging = Boolean(e.value);
+            setDragging(isDragging);
+            if (!isDragging) commitTransform();
         };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('objectChange', onChange);
+        ctrl.addEventListener('mouseUp', commitTransform);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('objectChange', onChange);
+            ctrl.removeEventListener('mouseUp', commitTransform);
         };
     }, [editTarget, editable, onGarmentTransformChange]);
 
@@ -348,19 +356,20 @@ function SceneContent({
     useEffect(() => {
         const ctrl = boneControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'bone' || !selectedBone) return;
-        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
-        const onChange = () => {
+        const commitTransform = () => {
             if (!selectedBone) return;
-            onBoneTransformChange?.(selectedBone.name, {
-                position: [selectedBone.position.x, selectedBone.position.y, selectedBone.position.z],
-                rotation: [selectedBone.rotation.x, selectedBone.rotation.y, selectedBone.rotation.z],
-            });
+            onBoneTransformChange?.(selectedBone.name, readTransform(selectedBone));
+        };
+        const onDrag = (e: { value?: boolean }) => {
+            const isDragging = Boolean(e.value);
+            setDragging(isDragging);
+            if (!isDragging) commitTransform();
         };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('objectChange', onChange);
+        ctrl.addEventListener('mouseUp', commitTransform);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('objectChange', onChange);
+            ctrl.removeEventListener('mouseUp', commitTransform);
         };
     }, [editTarget, editable, onBoneTransformChange, selectedBone]);
 
