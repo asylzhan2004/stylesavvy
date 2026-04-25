@@ -328,25 +328,21 @@ function SceneContent({
         }
     }, [avatar, preset.avatarPose.bones]);
 
-    // ── Garment gizmo events (commit only on drag-end for perf) ─────────────────
+    // ── Garment gizmo events (real-time updates for smooth feedback) ────────────
     useEffect(() => {
         const ctrl = garmentControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'garment') return;
-        const commitTransform = () => {
+        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
+        const onChange = () => {
             const g = garmentGroupRef.current;
             if (!g) return;
             onGarmentTransformChange?.(readGarmentTransform(g));
         };
-        const onDrag = (e: { value?: boolean }) => {
-            const isDragging = Boolean(e.value);
-            setDragging(isDragging);
-            if (!isDragging) commitTransform();
-        };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('mouseUp', commitTransform);
+        ctrl.addEventListener('objectChange', onChange);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('mouseUp', commitTransform);
+            ctrl.removeEventListener('objectChange', onChange);
         };
     }, [editTarget, editable, onGarmentTransformChange]);
 
