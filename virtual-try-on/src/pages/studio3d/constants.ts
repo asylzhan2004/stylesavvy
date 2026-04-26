@@ -61,7 +61,7 @@ export const QUICK_TONE_PRESETS = [
     { name: 'Sunset', colors: ['#4A0080', '#8E0052', '#C62828', '#EF6C00', '#FDD835', '#FFFDE7'] },
 ];
 
-export const TEX_RES = 2048;
+export const TEX_RES = 1024;
 export const DECAL_TEXTURE_MAX = 1024;
 export const DECAL_TEXTURE_MIN = 256;
 export const DECAL_IMAGE_MAX_SIDE = 1200;

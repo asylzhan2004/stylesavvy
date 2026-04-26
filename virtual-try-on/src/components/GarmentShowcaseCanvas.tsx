@@ -1,6 +1,6 @@
 import { Suspense, useMemo, useRef, memo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, OrbitControls, useGLTF } from '@react-three/drei';
+import { Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface GarmentShowcaseCanvasProps {
@@ -85,13 +85,20 @@ export const GarmentShowcaseCanvas = memo(function GarmentShowcaseCanvas({
     modelPosition = [0, 0, 0],
 }: GarmentShowcaseCanvasProps) {
     return (
-        <div style={{ width: '100%', height: '100%' }}>
+        // touch-action: pan-y позволяет браузеру скроллить страницу при свайпе по канвасу
+        <div style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}>
             <Canvas
                 camera={{ position: [0, 0, 4.6], fov: 32 }}
                 dpr={[1, 1]}
                 gl={{ antialias: false, powerPreference: 'high-performance' }}
-                performance={{ min: 0.3 }}
+                performance={{ min: 0.5 }}
                 frameloop="always"
+                // Отключаем перехват событий мыши/тача самим Canvas
+                style={{ touchAction: 'pan-y' }}
+                onCreated={({ gl }) => {
+                    // Не блокируем нативный скролл на мобиле
+                    gl.domElement.style.touchAction = 'pan-y';
+                }}
             >
                 <ambientLight intensity={1.1} />
                 <hemisphereLight intensity={0.9} groundColor="#08110a" color="#f3fff1" />
@@ -115,13 +122,7 @@ export const GarmentShowcaseCanvas = memo(function GarmentShowcaseCanvas({
                         modelPosition={modelPosition}
                     />
                 </Suspense>
-
-                <OrbitControls
-                    enablePan={false}
-                    enableZoom={false}
-                    minPolarAngle={Math.PI * 0.32}
-                    maxPolarAngle={Math.PI * 0.68}
-                />
+                {/* OrbitControls убран — карточки авто-вращаются, controls только мешали скроллу на тач-устройствах */}
             </Canvas>
         </div>
     );

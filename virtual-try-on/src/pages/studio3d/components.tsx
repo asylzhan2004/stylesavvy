@@ -260,8 +260,8 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
             if (!texRefs.current[partName]) {
                 if (!partCanvases[partName]) {
                     const cvs = document.createElement('canvas');
-                    cvs.width = 2048;
-                    cvs.height = 2048;
+                    cvs.width = 1024;
+                    cvs.height = 1024;
                     partCanvases[partName] = cvs;
                 }
                 const tex = applyTextureQuality(new THREE.CanvasTexture(partCanvases[partName]));

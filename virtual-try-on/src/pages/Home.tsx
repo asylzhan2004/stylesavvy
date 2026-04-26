@@ -8,19 +8,23 @@ const LazyGarmentShowcaseCanvas = lazy(() =>
     import('../components/GarmentShowcaseCanvas').then(m => ({ default: m.GarmentShowcaseCanvas }))
 );
 
-function useInView(ref: React.RefObject<HTMLElement | null>, rootMargin = '200px') {
-    const [isInView, setIsInView] = useState(false);
+function useInView(ref: React.RefObject<HTMLElement | null>, rootMargin = '300px') {
+    const [hasBeenSeen, setHasBeenSeen] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
         const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) { setIsInView(true); observer.disconnect(); } },
+            ([entry]) => {
+                if (entry.isIntersecting) setHasBeenSeen(true);
+                setIsVisible(entry.isIntersecting);
+            },
             { rootMargin }
         );
         observer.observe(el);
         return () => observer.disconnect();
     }, [ref, rootMargin]);
-    return isInView;
+    return { hasBeenSeen, isVisible };
 }
 
 // Typewriter hook
@@ -549,15 +553,18 @@ function Lazy3DCard({ modelPath, accent, modelScale, modelRotation, modelPositio
     modelRotation?: [number, number, number]; modelPosition?: [number, number, number];
 }) {
     const cardRef = useRef<HTMLDivElement>(null);
-    const isVisible = useInView(cardRef);
+    const { hasBeenSeen, isVisible } = useInView(cardRef);
     return (
         <div ref={cardRef} style={{ position: 'absolute', inset: 0 }}>
-            {isVisible && (
-                <Suspense fallback={
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9cb29f', fontSize: 12, letterSpacing: '0.16em' }}>Loading 3D...</div>
-                }>
-                    <LazyGarmentShowcaseCanvas modelPath={modelPath} accent={accent} modelScale={modelScale} modelRotation={modelRotation} modelPosition={modelPosition} />
-                </Suspense>
+            {/* Mount once when first seen, then toggle CSS visibility — avoids WebGL Context Lost on scroll */}
+            {hasBeenSeen && (
+                <div style={{ position: 'absolute', inset: 0, visibility: isVisible ? 'visible' : 'hidden', pointerEvents: isVisible ? 'auto' : 'none' }}>
+                    <Suspense fallback={
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9cb29f', fontSize: 12, letterSpacing: '0.16em' }}>Loading 3D...</div>
+                    }>
+                        <LazyGarmentShowcaseCanvas modelPath={modelPath} accent={accent} modelScale={modelScale} modelRotation={modelRotation} modelPosition={modelPosition} />
+                    </Suspense>
+                </div>
             )}
         </div>
     );

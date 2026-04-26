@@ -466,4 +466,4 @@ export function MaleSceneCanvas(props: MaleSceneCanvasProps) {
     );
 }
 
-useGLTF.preload(MALE_BASE_MODEL_URL);
+// NOTE: Removed top-level preload — the model loads on demand via useGLTF in SceneContent.
