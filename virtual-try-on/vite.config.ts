@@ -6,26 +6,30 @@ export default defineConfig({
   plugins: [react()],
 
   build: {
-    // Chunk splitting removed to let Vite handle React dependencies correctly and avoid 'useLayoutEffect' error
     rollupOptions: {
-      // Vite по умолчанию сам отлично справляется с чанками
+      output: {
+        manualChunks: {
+          'vendor-three': ['three'],
+          'vendor-r3f': ['@react-three/fiber', '@react-three/drei'],
+          'vendor-framer': ['framer-motion'],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
     },
-    // Предупреждения о больших чанках убраны (GLB файлы большие — это нормально)
     chunkSizeWarningLimit: 1000,
-    // Минификация
     minify: 'esbuild',
     target: 'esnext',
+    cssMinify: true,
+    sourcemap: false,
   },
 
-  // Оптимизация зависимостей при старте dev-сервера
   optimizeDeps: {
-    include: ['three', '@react-three/fiber', '@react-three/drei', 'framer-motion'],
+    include: ['three', '@react-three/fiber', '@react-three/drei', 'framer-motion', 'react', 'react-dom'],
   },
 
   server: {
-    // Gzip сжатие в dev режиме
     hmr: {
-      overlay: false, // убираем overlay ошибок (меньше DOM нагрузка)
+      overlay: false,
     },
   },
 })

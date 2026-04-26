@@ -63,10 +63,14 @@ export function useTouchGesture({ onMove, onScale, onRotate }: UseTouchGestureOp
     }, []);
 
     const onTouchMove = useCallback((e: React.TouchEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
         const s = state.current;
         if (!s.active) return;
+        e.stopPropagation();
+        // Only prevent default when actively handling a gesture (pinch/rotate)
+        // to avoid blocking native page/sidebar scroll on single-finger touch
+        if (s.pinching) {
+            e.preventDefault();
+        }
 
         if (e.touches.length === 1 && !s.pinching) {
             const dx = e.touches[0].clientX - s.startX;

@@ -37,6 +37,7 @@ export function Studio3D() {
     const [isWalking, setIsWalking] = useState(false);
     const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const canvasContainerRef = useRef<HTMLDivElement>(null);
     const touchStartY = useRef(0);
 
     // ── Mobile swipe-up/down gesture on the sidebar handle ──
@@ -74,10 +75,11 @@ export function Studio3D() {
     // ── Smart preload ──
     useEffect(() => {
         useGLTF.preload(currentModel.url);
-        const timer = setTimeout(() => {
+        const preloadRelated = () => {
             MODELS.filter(m => m.gender === currentModel.gender && m.category === currentModel.category && m.id !== currentModel.id)
                 .forEach(m => useGLTF.preload(m.url));
-        }, 800);
+        };
+        const timer = setTimeout(preloadRelated, 1200);
         return () => clearTimeout(timer);
     }, [currentModel.url, currentModel.gender, currentModel.category]);
 
@@ -187,8 +189,8 @@ export function Studio3D() {
             <div className="studio-content" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
                 {/* 3D Canvas */}
-                <motion.div ref={useRef<HTMLDivElement>(null)} className="studio-canvas" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.2 }} style={{ flex: 1, position: 'relative' }}>
-                    <Canvas shadows dpr={1} gl={{ antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true }} camera={{ position: [0, 1, 5], fov: 42 }} style={{ width: '100%', height: '100%' }}>
+                <motion.div ref={canvasContainerRef} className="studio-canvas" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.2 }} style={{ flex: 1, position: 'relative' }}>
+                    <Canvas shadows dpr={1} gl={{ antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false }} camera={{ position: [0, 1, 5], fov: 42 }} style={{ width: '100%', height: '100%', touchAction: 'none' }}>
                         <SceneBg color={bgColor} />
                         <SceneCapturer requestRef={design.captureRef} />
                         <DynamicLights lights={lights} showGizmos={activeTab === 'lighting'} expandedLightId={expandedLight} updLight={updLight} setExpandedId={setExpandedLight} />

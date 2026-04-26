@@ -31,11 +31,15 @@ export function Navbar() {
     const studioFirstNav = typeof window !== 'undefined';
 
     useEffect(() => {
-        const handleResize = () => setIsCompact(window.innerWidth < 980);
+        let rafId: number;
+        const handleResize = () => {
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => setIsCompact(window.innerWidth < 980));
+        };
 
         handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener('resize', handleResize, { passive: true });
+        return () => { window.removeEventListener('resize', handleResize); cancelAnimationFrame(rafId); };
     }, []);
 
     if (studioFirstNav) {

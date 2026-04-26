@@ -3,7 +3,7 @@ import { CH, CW, DECAL_IMAGE_MAX_SIDE, DECAL_TEXTURE_MAX, DECAL_TEXTURE_MIN } fr
 
 export function applyTextureQuality<T extends THREE.Texture>(tex: T): T {
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 16;
+    tex.anisotropy = 4;
     tex.minFilter = THREE.LinearMipmapLinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.generateMipmaps = true;

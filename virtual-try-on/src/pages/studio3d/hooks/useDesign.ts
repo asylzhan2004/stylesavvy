@@ -82,13 +82,22 @@ export function useDesign({ currentModelUrl: _url, currentModelUvConfig, setShir
         return partCanvases.current[name];
     }, []);
 
+    const renderTimerId = useRef<number>(0);
+    const lastRenderTime = useRef<number>(0);
+    const renderPending = useRef(false);
+
     // ── Render design → canvases → notify Three.js ──
     const renderDesign = useCallback((
         shirtColor: string,
     ) => {
-        cancelAnimationFrame(renderRafId.current);
-        renderRafId.current = requestAnimationFrame(() => {
-            const partsToRender = availableParts.length > 0 ? availableParts : ['default'];
+        renderPending.current = true;
+
+        const executeRender = () => {
+            renderPending.current = false;
+            lastRenderTime.current = performance.now();
+            cancelAnimationFrame(renderRafId.current);
+            renderRafId.current = requestAnimationFrame(() => {
+                const partsToRender = availableParts.length > 0 ? availableParts : ['default'];
             const globalScale = TEX_RES / 1024;
 
             partsToRender.forEach(partName => {
@@ -182,6 +191,21 @@ export function useDesign({ currentModelUrl: _url, currentModelUvConfig, setShir
 
             window.dispatchEvent(new CustomEvent('tex-sync'));
         });
+        };
+
+        const now = performance.now();
+        const TIME_BETWEEN_RENDERS = 50; // max ~20 FPS for 2K canvas redraws
+
+        if (now - lastRenderTime.current > TIME_BETWEEN_RENDERS) {
+            executeRender();
+        } else {
+            if (!renderTimerId.current) {
+                renderTimerId.current = window.setTimeout(() => {
+                    renderTimerId.current = 0;
+                    if (renderPending.current) executeRender();
+                }, TIME_BETWEEN_RENDERS - (now - lastRenderTime.current));
+            }
+        }
     }, [availableParts, els, paintLayers, shirtGradient, fabric, partColors, partGradients, partFabrics, fabricImages, currentModelUvConfig, getPartCanvas]);
 
     // ── Element CRUD ──

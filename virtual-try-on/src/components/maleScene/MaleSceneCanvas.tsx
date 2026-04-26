@@ -10,7 +10,7 @@
  */
 
 import {
-    Suspense, useCallback, useEffect, useMemo, useRef, useState,
+    Suspense, memo, useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, OrbitControls, TransformControls, useGLTF } from '@react-three/drei';
@@ -88,6 +88,14 @@ const cloneMat = (m: THREE.Material) => {
     if ('side' in c) (c as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
     return c;
 };
+const readTransform = (object: THREE.Object3D) => ({
+    position: [object.position.x, object.position.y, object.position.z] as BonePose['position'],
+    rotation: [object.rotation.x, object.rotation.y, object.rotation.z] as BonePose['rotation'],
+});
+const readGarmentTransform = (object: THREE.Object3D): MaleGarmentPreset['garmentTransform'] => ({
+    ...readTransform(object),
+    scale: [object.scale.x, object.scale.y, object.scale.z],
+});
 const prepareStatic = (src: THREE.Object3D) => {
     const cl = src.clone(true);
     cl.traverse(child => {
@@ -99,6 +107,8 @@ const prepareStatic = (src: THREE.Object3D) => {
     });
     return cl;
 };
+
+const _jointWp = new THREE.Vector3();
 
 // ── Joint sphere ──────────────────────────────────────────────────────────────
 function JointSphere({ bone, boneName, isSelected, isChain, isEditable, onSelect }: {
@@ -113,9 +123,8 @@ function JointSphere({ bone, boneName, isSelected, isChain, isEditable, onSelect
     useFrame((_, dt) => {
         if (!ref.current) return;
         t.current += dt;
-        const wp = new THREE.Vector3();
-        bone.getWorldPosition(wp);
-        ref.current.position.copy(wp);
+        bone.getWorldPosition(_jointWp);
+        ref.current.position.copy(_jointWp);
         ref.current.scale.setScalar(
             isSelected ? 1 + Math.sin(t.current * 5) * 0.22
                 : isChain ? 1 + Math.sin(t.current * 3) * 0.12
@@ -157,11 +166,13 @@ function BoneStick({ parentBone, childBone, boneName, isSelected, isChain }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const _pw = useMemo(() => new THREE.Vector3(), []);
+    const _cw = useMemo(() => new THREE.Vector3(), []);
+
     useFrame(() => {
         const attr = line.geometry.attributes.position as THREE.BufferAttribute;
-        const pw = new THREE.Vector3(); const cw = new THREE.Vector3();
-        parentBone.getWorldPosition(pw); childBone.getWorldPosition(cw);
-        attr.setXYZ(0, pw.x, pw.y, pw.z); attr.setXYZ(1, cw.x, cw.y, cw.z);
+        parentBone.getWorldPosition(_pw); childBone.getWorldPosition(_cw);
+        attr.setXYZ(0, _pw.x, _pw.y, _pw.z); attr.setXYZ(1, _cw.x, _cw.y, _cw.z);
         attr.needsUpdate = true;
         const mat = line.material as THREE.LineBasicMaterial;
         mat.color.set(isSelected ? '#fff' : BONE_COLOR[boneName] ?? '#7dff8f');
@@ -221,7 +232,7 @@ function SkeletonOverlay({ bones, selectedBoneName, editable, onBoneSelect }: {
 // ── Floor grid ────────────────────────────────────────────────────────────────
 */
 
-function FloorGrid() {
+const FloorGrid = memo(function FloorGrid() {
     return (
         <group position={[0, -0.93, 0]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
@@ -242,7 +253,7 @@ function FloorGrid() {
             ))}
         </group>
     );
-}
+});
 
 // ── Scene content ─────────────────────────────────────────────────────────────
 function SceneContent({
@@ -265,6 +276,7 @@ function SceneContent({
     const origPosesRef       = useRef<Record<string, BonePose>>({});
     const [dragging, setDragging]     = useState(false);
     const [bonesReady, setBonesReady] = useState(false);
+    const isDraggingGarmentRef        = useRef(false);
 
     // ── Collect bones ─────────────────────────────────────────────────────────
     useEffect(() => {
@@ -294,10 +306,10 @@ function SceneContent({
         setBonesReady(true);
     }, [avatar, onBoneDefaultsReady, onBonesReady]);
 
-    // ── Garment transform from preset ─────────────────────────────────────────
+    // ── Garment transform from preset (skip while gizmo is dragging) ──────────
     useEffect(() => {
         const g = garmentGroupRef.current;
-        if (!g) return;
+        if (!g || isDraggingGarmentRef.current) return;
         g.position.set(...preset.garmentTransform.position);
         g.rotation.set(...preset.garmentTransform.rotation);
         g.scale.set(...preset.garmentTransform.scale);
@@ -317,47 +329,45 @@ function SceneContent({
         }
     }, [avatar, preset.avatarPose.bones]);
 
-    // ── Garment gizmo events ──────────────────────────────────────────────────
+    // ── Garment gizmo events (commit on drag-end, visual handled by TransformControls) ─
     useEffect(() => {
         const ctrl = garmentControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'garment') return;
-        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
-        const onChange = () => {
-            const g = garmentGroupRef.current;
-            if (!g) return;
-            onGarmentTransformChange?.({
-                position: [g.position.x, g.position.y, g.position.z],
-                rotation: [g.rotation.x, g.rotation.y, g.rotation.z],
-                scale:    [g.scale.x, g.scale.y, g.scale.z],
-            });
+        const onDrag = (e: { value?: boolean }) => {
+            const active = Boolean(e.value);
+            isDraggingGarmentRef.current = active;
+            setDragging(active);
+            if (!active) {
+                const g = garmentGroupRef.current;
+                if (g) onGarmentTransformChange?.(readGarmentTransform(g));
+            }
         };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('objectChange', onChange);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('objectChange', onChange);
         };
     }, [editTarget, editable, onGarmentTransformChange]);
 
-    // ── Bone gizmo events ─────────────────────────────────────────────────────
+    // ── Bone gizmo events (commit only on drag-end for perf) ───────────────────
     const selectedBone = selectedBoneName ? bonesRef.current[selectedBoneName] ?? null : null;
 
     useEffect(() => {
         const ctrl = boneControlsRef.current;
         if (!ctrl || !editable || editTarget !== 'bone' || !selectedBone) return;
-        const onDrag   = (e: { value?: boolean }) => setDragging(Boolean(e.value));
-        const onChange = () => {
+        const commitTransform = () => {
             if (!selectedBone) return;
-            onBoneTransformChange?.(selectedBone.name, {
-                position: [selectedBone.position.x, selectedBone.position.y, selectedBone.position.z],
-                rotation: [selectedBone.rotation.x, selectedBone.rotation.y, selectedBone.rotation.z],
-            });
+            onBoneTransformChange?.(selectedBone.name, readTransform(selectedBone));
+        };
+        const onDrag = (e: { value?: boolean }) => {
+            const isDragging = Boolean(e.value);
+            setDragging(isDragging);
+            if (!isDragging) commitTransform();
         };
         ctrl.addEventListener('dragging-changed', onDrag);
-        ctrl.addEventListener('objectChange', onChange);
+        ctrl.addEventListener('mouseUp', commitTransform);
         return () => {
             ctrl.removeEventListener('dragging-changed', onDrag);
-            ctrl.removeEventListener('objectChange', onChange);
+            ctrl.removeEventListener('mouseUp', commitTransform);
         };
     }, [editTarget, editable, onBoneTransformChange, selectedBone]);
 
@@ -368,14 +378,11 @@ function SceneContent({
             <color attach="background" args={['#06090a']} />
             <fog attach="fog" args={['#06090a', 7, 16]} />
 
-            {/* Lighting */}
-            <ambientLight intensity={0.7} />
-            <hemisphereLight intensity={0.8} color="#ffffff" groundColor="#102214" />
-            <directionalLight position={[3.8, 5.5, 3.6]} intensity={2.2} color="#f8fff5" castShadow shadow-mapSize={[2048, 2048]} />
-            <directionalLight position={[-3.5, 2.8, 2.5]} intensity={1.0} color="#8df6a5" />
-            <pointLight position={[0, 1.5, 2.5]} intensity={1.1} color="#d6ffe1" />
-            <spotLight position={[0, 6, 0]} angle={0.4} penumbra={0.5} intensity={1.3} color="#d7ffdb" />
-            <pointLight position={[0, 2.5, -2.5]} intensity={0.6} color="#2af5a2" />
+            {/* Lighting — reduced from 7 to 4 sources for perf */}
+            <ambientLight intensity={0.8} />
+            <hemisphereLight intensity={0.9} color="#ffffff" groundColor="#102214" />
+            <directionalLight position={[3.8, 5.5, 3.6]} intensity={2.4} color="#f8fff5" castShadow shadow-mapSize={[1024, 1024]} />
+            <directionalLight position={[-3.5, 2.8, 2.5]} intensity={1.2} color="#8df6a5" />
 
             <FloorGrid />
 
@@ -438,7 +445,8 @@ export function MaleSceneCanvas(props: MaleSceneCanvasProps) {
             <Canvas
                 camera={{ position: [0, 1.2, 3.3], fov: 34 }}
                 shadows
-                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+                dpr={[1, 1.5]}
+                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, powerPreference: 'high-performance' }}
             >
                 <Suspense fallback={
                     <Html center>
@@ -458,4 +466,4 @@ export function MaleSceneCanvas(props: MaleSceneCanvasProps) {
     );
 }
 
-useGLTF.preload(MALE_BASE_MODEL_URL);
+// NOTE: Removed top-level preload — the model loads on demand via useGLTF in SceneContent.

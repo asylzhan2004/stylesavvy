@@ -1,9 +1,31 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { PromoCarousel } from '../components/PromoCarousel';
-import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
-import { GarmentShowcaseCanvas } from '../components/GarmentShowcaseCanvas';
+import { useRef, useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
 import { useT, useLangStore } from '../i18n/store';
+
+const LazyGarmentShowcaseCanvas = lazy(() =>
+    import('../components/GarmentShowcaseCanvas').then(m => ({ default: m.GarmentShowcaseCanvas }))
+);
+
+function useInView(ref: React.RefObject<HTMLElement | null>, rootMargin = '300px') {
+    const [hasBeenSeen, setHasBeenSeen] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) setHasBeenSeen(true);
+                setIsVisible(entry.isIntersecting);
+            },
+            { rootMargin }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [ref, rootMargin]);
+    return { hasBeenSeen, isVisible };
+}
 
 // Typewriter hook
 function useTypewriter(words: string[], typingSpeed = 100, deletingSpeed = 60, pauseDuration = 2000) {
@@ -47,7 +69,7 @@ function useTypewriter(words: string[], typingSpeed = 100, deletingSpeed = 60, p
 }
 
 // ── Green Glow Orb Component — мемоизируем, добавляем will-change ──
-function GlowOrb({ x, y, size, delay, intensity = 1 }: { x: string; y: string; size: number; delay: number; intensity?: number }) {
+const GlowOrb = memo(function GlowOrb({ x, y, size, delay, intensity = 1 }: { x: string; y: string; size: number; delay: number; intensity?: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
@@ -68,7 +90,7 @@ function GlowOrb({ x, y, size, delay, intensity = 1 }: { x: string; y: string; s
             }}
         />
     );
-}
+});
 
 // ── SVG Ink filter for text ──
 function InkFilter() {
@@ -85,7 +107,7 @@ function InkFilter() {
 }
 
 // ── Floating Particles (мемоизировано — random только 1 раз) ──
-function FloatingParticles() {
+const FloatingParticles = memo(function FloatingParticles() {
     const particles = useMemo(() =>
         Array.from({ length: 10 }, (_, i) => ({
             id: i,
@@ -130,10 +152,10 @@ function FloatingParticles() {
             ))}
         </div>
     );
-}
+});
 
 // ── Video Hero — плавная ленивая загрузка ──
-function HeroVideo() {
+const HeroVideo = memo(function HeroVideo() {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [videoOpacity, setVideoOpacity] = useState(0);
 
@@ -270,7 +292,7 @@ function HeroVideo() {
             <FloatingParticles />
         </div>
     );
-}
+});
 
 // ── Rotating Facts Aside ──
 const clothingGroupFacts = [
@@ -482,7 +504,7 @@ function RotatingFactsAside({ lang }: { lang: string }) {
 }
 
 // ── Animated stat card ──
-function StatCard({ value, label, index }: { value: string; label: string; index: number }) {
+const StatCard = memo(function StatCard({ value, label, index }: { value: string; label: string; index: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -510,10 +532,10 @@ function StatCard({ value, label, index }: { value: string; label: string; index
             <div style={{ color: '#7fa495', fontSize: 12, lineHeight: 1.6, marginTop: 6 }}>{label}</div>
         </motion.div>
     );
-}
+});
 
 // ── Shimmer divider ──
-function ShimmerDivider() {
+const ShimmerDivider = memo(function ShimmerDivider() {
     return (
         <div style={{ position: 'relative', height: 2, margin: '0 clamp(20px, 5vw, 72px)' }}>
             <div style={{
@@ -522,6 +544,28 @@ function ShimmerDivider() {
                 backgroundSize: '200% 100%',
                 animation: 'shimmer-line 3s ease-in-out infinite',
             }} />
+        </div>
+    );
+});
+
+function Lazy3DCard({ modelPath, accent, modelScale, modelRotation, modelPosition }: {
+    modelPath: string; accent: string; modelScale?: number;
+    modelRotation?: [number, number, number]; modelPosition?: [number, number, number];
+}) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const { hasBeenSeen, isVisible } = useInView(cardRef);
+    return (
+        <div ref={cardRef} style={{ position: 'absolute', inset: 0 }}>
+            {/* Mount once when first seen, then toggle CSS visibility — avoids WebGL Context Lost on scroll */}
+            {hasBeenSeen && (
+                <div style={{ position: 'absolute', inset: 0, visibility: isVisible ? 'visible' : 'hidden', pointerEvents: isVisible ? 'auto' : 'none' }}>
+                    <Suspense fallback={
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9cb29f', fontSize: 12, letterSpacing: '0.16em' }}>Loading 3D...</div>
+                    }>
+                        <LazyGarmentShowcaseCanvas modelPath={modelPath} accent={accent} modelScale={modelScale} modelRotation={modelRotation} modelPosition={modelPosition} />
+                    </Suspense>
+                </div>
+            )}
         </div>
     );
 }
@@ -750,9 +794,7 @@ export function Home() {
                                 <div className="category-card-inner" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', alignItems: 'stretch' }}>
                                     <div className="category-canvas-area" style={{ position: 'relative', minHeight: 340, background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 62%)' }}>
                                         <div style={{ position: 'absolute', left: '18%', right: '18%', bottom: '14%', height: '16%', borderRadius: '50%', background: `radial-gradient(circle, ${card.accent}66 0%, transparent 72%)`, filter: 'blur(24px)' }} />
-                                        <div style={{ position: 'absolute', inset: 0 }}>
-                                            <GarmentShowcaseCanvas modelPath={card.modelPath} accent={card.accent} modelScale={card.modelScale} modelRotation={card.modelRotation} modelPosition={card.modelPosition as [number, number, number]} />
-                                        </div>
+                                        <Lazy3DCard modelPath={card.modelPath} accent={card.accent} modelScale={card.modelScale} modelRotation={card.modelRotation} modelPosition={card.modelPosition as [number, number, number]} />
                                     </div>
                                     <div style={{ padding: 'clamp(26px, 4vw, 40px)', display: 'grid', alignContent: 'center', gap: 18, background: 'linear-gradient(180deg, rgba(4, 9, 6, 0.14) 0%, rgba(4, 9, 6, 0.32) 100%)' }}>
                                         <div style={{ display: 'inline-flex', width: 'fit-content', padding: '9px 14px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#dfffe6', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 800 }}>{card.tag}</div>

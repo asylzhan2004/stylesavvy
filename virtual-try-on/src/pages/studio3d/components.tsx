@@ -260,8 +260,8 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
             if (!texRefs.current[partName]) {
                 if (!partCanvases[partName]) {
                     const cvs = document.createElement('canvas');
-                    cvs.width = 2048;
-                    cvs.height = 2048;
+                    cvs.width = 1024;
+                    cvs.height = 1024;
                     partCanvases[partName] = cvs;
                 }
                 const tex = applyTextureQuality(new THREE.CanvasTexture(partCanvases[partName]));
@@ -338,15 +338,17 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
         }
     });
 
-    const decalMeshes = useMemo(() => decals.map((d) => {
+    const decalMeshes = useMemo(() => {
+        const _center = new THREE.Vector3();
+        const _box = new THREE.Box3();
+        return decals.map((d) => {
         let targetMesh: THREE.Mesh | null = null;
         let bestDist = Infinity;
         model?.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
-                const center = new THREE.Vector3();
-                new THREE.Box3().setFromObject(mesh).getCenter(center);
-                const dist = center.distanceTo(d.position);
+                _box.setFromObject(mesh).getCenter(_center);
+                const dist = _center.distanceTo(d.position);
                 if (dist < bestDist) { bestDist = dist; targetMesh = mesh; }
             }
         });
@@ -373,7 +375,7 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
         } catch {
             return null;
         }
-    }), [decals, model]);
+    }); }, [decals, model]);
 
     return (
         <group ref={modelRootRef} scale={targetScale} position={[0, positionY, 0]}>
@@ -504,6 +506,12 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
                 onPointerUp={() => {
                     isPointerDown.current = false;
                     if (controls) (controls as any).enabled = true;
+                }}
+                onPointerLeave={() => {
+                    if (isPointerDown.current) {
+                        isPointerDown.current = false;
+                        if (controls) (controls as any).enabled = true;
+                    }
                 }}
                 onPointerMove={(e: any) => {
                     if (isMovingElement && isPointerDown.current && onMoveElement) {
