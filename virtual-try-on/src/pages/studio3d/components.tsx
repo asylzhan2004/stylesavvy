@@ -507,6 +507,12 @@ export function TShirt3D({ modelUrl, flipNormals, fixRotation, modelScale, partC
                     isPointerDown.current = false;
                     if (controls) (controls as any).enabled = true;
                 }}
+                onPointerLeave={() => {
+                    if (isPointerDown.current) {
+                        isPointerDown.current = false;
+                        if (controls) (controls as any).enabled = true;
+                    }
+                }}
                 onPointerMove={(e: any) => {
                     if (isMovingElement && isPointerDown.current && onMoveElement) {
                         let uv = e.uv ?? e.intersections?.find((i: any) => i.uv != null)?.uv;
